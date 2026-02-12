@@ -1,0 +1,60 @@
+RF System Decomposition
+Student: Arsenii Marchenko — s2312637
+Selected device: LoRa Node – Semtech SX1276
+Datasheet: https://semtech.my.salesforce.com/sfc/p/#E0000000JelG/a/2R0000001Rbr/6EfVZUorrpoKFfvaF_Fkpgp5kzjiNyiAbqcpqh9qSjE
+
+1) Information Source / MCU
+
+The SX1276 is not a microcontroller; it is only a radio transceiver chip. An external microcontroller (for example STM32 or AVR) is required to provide transmission data, process received data, configure registers, and manage operation via the SPI interface. Tasks such as packet formation, timing, and protocol logic are handled by this host MCU rather than by the SX1276 itself.
+
+Function: Controls system behavior and manages data exchange with the transceiver.
+
+2) RF Transceiver (Transmit/Receive Core)
+
+At the heart of the SX1276 is a half-duplex RF transceiver supporting frequencies roughly from 137 MHz to 1020 MHz. It integrates RF front-end circuitry responsible for frequency conversion, filtering, and signal conditioning.
+
+Receive path: Antenna → LNA/mixer → demodulator → digital baseband
+
+Transmit path: Digital baseband → modulator → up-converter → power amplifier → antenna
+
+3) Modulation / Demodulation
+
+The chip contains built-in digital modem blocks supporting LoRa as well as traditional modulation schemes such as FSK and OOK. LoRa uses spread-spectrum modulation, which enables long-distance communication and strong resistance to interference.
+
+In transmit mode, binary data is converted into an RF waveform by the digital modulator; in receive mode, the process is reversed. All modulation settings are controlled through configuration registers accessed by the MCU.
+
+4) Power Amplifier (PA)
+
+Several internal power amplifiers are integrated:
+
+PA_HF / PA_LF: up to about +14 dBm output
+
+PA_BOOST: up to about +20 dBm for higher transmission power
+
+The PA is part of the transmit chain and increases signal strength before radiation. It uses a dedicated supply pin and internal bias circuitry (VR_PA).
+
+5) Low Noise Amplifier (LNA)
+
+At the start of the receive chain, an integrated LNA boosts weak incoming RF signals while adding minimal noise. This improves receiver sensitivity, which can reach approximately –148 dBm, and lowers the effective noise floor.
+
+6) RF Filtering and Matching Network
+
+The SX1276 includes internal RF filtering and matching optimized for supported frequency ranges. However, external components such as inductors and capacitors are required on the PCB to match the antenna impedance (typically 50 Ω) and shape the bandpass response.
+
+Additional external filters (for example SAW or ceramic filters) may be used to meet regulatory requirements and suppress unwanted emissions.
+
+7) Antenna Interface
+
+The transmit output and receive input are typically connected to a shared antenna node through an external matching circuit or transmit/receive switch. Pins such as RFO_LF, RFO_HF, and PA_BOOST connect to PCB RF traces that lead to the antenna connector or printed antenna.
+
+Purpose: Provides the physical interface between the radio circuitry and free-space transmission.
+
+8) RF Power Supply
+
+The SX1276 uses several supply pins dedicated to analog and RF sections, including:
+
+VBAT_RF / VBAT_ANA — supplies for analog and RF circuitry
+
+VR_PA — regulated supply for the power amplifier
+
+Internal regulators may be present, but external decoupling capacitors are required to minimize noise. The device typically operates from about 1.8 V to 3.7 V, with output power dependent on supply voltage.
